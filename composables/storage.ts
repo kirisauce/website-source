@@ -53,21 +53,35 @@ export function persistentValue<T>(
     deserializer: (string) => T = String,
     serializer: (T) => string = String,
 ) {
-    if (getClientValue(key) === undefined) {
-        setClientValue(key, defaultValue());
+    if (process.client) {
+        if (!getClientValue(key)) {
+            setClientValue(key, serializer(defaultValue()));
+        }
+
+        let tempValue = ref(deserializer(getClientValue(key)));
+
+        return computed({
+            get() {
+                return tempValue.value;
+            },
+
+            set(newValue) {
+                let newValueString = serializer(newValue);
+                tempValue.value = newValue;
+                setClientValue(key, newValueString);
+            },
+        });
+    } else {
+        let tempValue = defaultValue();
+
+        return computed({
+            get() {
+                return tempValue.value;
+            },
+
+            set(newValue) {
+                tempValue = newValue;
+            },
+        });
     }
-
-    let tempValue = ref(getClientValue(key));
-
-    return computed({
-        get() {
-            return deserializer(tempValue.value);
-        },
-
-        set(newValue) {
-            let newValueString = serializer(newValue);
-            tempValue.value = newValueString;
-            setClientValue(key, newValueString);
-        },
-    });
 }

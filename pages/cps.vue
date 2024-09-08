@@ -49,7 +49,7 @@ const modes = [
         label: "mouse事件 (推荐鼠标使用)",
     },
 ];
-const mode = persistentValue("cps.mode", () => modes[0]);
+const mode = persistentValue("cps.mode", () => modes[0].id);
 const canBeTerminated = persistentValue(
     "cps.canBeTerminated",
     () => true,
