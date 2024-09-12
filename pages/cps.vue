@@ -56,6 +56,7 @@ const canBeTerminated = persistentValue(
     booleanDeserializer,
 );
 const totalSecs = persistentValue("cps.totalSecs", () => 10, Number);
+const captureKeyboard = persistentValue("cps.captureKeyboard", () => false, booleanDeserializer);
 const overlayEnabled = ref(false);
 const count = ref(0);
 const stopAt = ref(new Date());
@@ -173,6 +174,20 @@ onMounted(() => {
         "mousedown",
         wrapCallback("mouse", addValueCallback),
     );
+
+    document.addEventListener('keydown', (e) => {
+        if (overlayEnabled.value && captureKeyboard.valu) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isFirstClick.value) {
+                startTest(e);
+                isFirstClick.value = false;
+            }
+
+            addValueCallback(e);
+        }
+    });
 });
 </script>
 
@@ -261,6 +276,11 @@ onMounted(() => {
 
             显示中止按钮
             <UToggle v-model="canBeTerminated"></UToggle>
+
+            <br />
+
+            捕获键盘事件
+            <UToggle v-model="captureKeyboard"></UToggle>
         </UCard>
     </UModal>
 </template>
