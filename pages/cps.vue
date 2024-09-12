@@ -176,7 +176,11 @@ onMounted(() => {
     );
 
     document.addEventListener('keydown', (e) => {
-        if (overlayEnabled.value && captureKeyboard.valu) {
+        if (e.keyCode == 27 && overlayEnabled.value) {
+            stopTest(e);
+        } else if (e.keyCode == 13 && !overlayEnabled.value) {
+            prepareTest(e);
+        } else if (overlayEnabled.value && captureKeyboard.value) {
             e.preventDefault();
             e.stopPropagation();
 
