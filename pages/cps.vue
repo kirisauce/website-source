@@ -21,8 +21,8 @@ useHead({
             content: "CPS测试, 在线, 鼠标点击速度测试, CPS test",
         },
         {
-            property: 'og:description',
-            content: '测试您的鼠标点击速度。',
+            property: "og:description",
+            content: "测试您的鼠标点击速度。",
         },
         {
             property: "og:title",
@@ -56,7 +56,11 @@ const canBeTerminated = persistentValue(
     booleanDeserializer,
 );
 const totalSecs = persistentValue("cps.totalSecs", () => 10, Number);
-const captureKeyboard = persistentValue("cps.captureKeyboard", () => false, booleanDeserializer);
+const captureKeyboard = persistentValue(
+    "cps.captureKeyboard",
+    () => false,
+    booleanDeserializer,
+);
 const overlayEnabled = ref(false);
 const count = ref(0);
 const stopAt = ref(new Date());
@@ -175,7 +179,7 @@ onMounted(() => {
         wrapCallback("mouse", addValueCallback),
     );
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener("keydown", (e) => {
         if (e.keyCode == 27 && overlayEnabled.value) {
             stopTest(e);
         } else if (e.keyCode == 13 && !overlayEnabled.value) {
@@ -205,6 +209,7 @@ onMounted(() => {
                     variant="solid"
                     v-show="canBeTerminated || isFirstClick"
                     @click="stopTest"
+                    icon="heroicons:x-mark"
                     @mousedown="(e) => e.stopPropagation()"
                     @touchstart="(e) => e.stopPropagation()"
                 />
@@ -228,12 +233,13 @@ onMounted(() => {
                             color="lime"
                             @click="prepareTest"
                             size="xl"
+                            icon="heroicons:paper-airplane"
                             block
                         />
                     </div>
                     <div id="optionsButton">
                         <UButton
-                            icon="heroicons:adjustments-horizontal"
+                            icon="heroicons:cog-8-tooth"
                             variant="outline"
                             color="sky"
                             @click="showOptions = true"
@@ -246,10 +252,16 @@ onMounted(() => {
         </Transition>
 
         <div id="informationContainer" class="flex-column">
-            <div id="information"></div>
-            <p>点击次数: {{ count }}</p>
-            <p>CPS: {{ formatFloat(cps, 2) }}</p>
-            <p v-show="isFirstClick && overlayEnabled">点击屏幕开始测试</p>
+            <div id="information">
+                <p>点击次数: {{ count }}</p>
+                <p>CPS: {{ formatFloat(cps, 2) }}</p>
+            </div>
+            <Transition name="fcInfo">
+                <div id="fcInfo" v-show="overlayEnabled && isFirstClick">
+                    <p>点击屏幕开始测试</p>
+                    <p v-show="captureKeyboard">键盘检测已启用</p>
+                </div>
+            </Transition>
         </div>
     </div>
 
@@ -278,13 +290,17 @@ onMounted(() => {
 
             <br />
 
-            显示中止按钮
-            <UToggle v-model="canBeTerminated"></UToggle>
+            <div class="toggleOption">
+                <a>显示中止按钮</a>
+                <div><UToggle v-model="canBeTerminated"></UToggle></div>
+            </div>
 
             <br />
 
-            捕获键盘事件
-            <UToggle v-model="captureKeyboard"></UToggle>
+            <div class="toggleOption">
+                <a>捕获键盘事件</a>
+                <div><UToggle v-model="captureKeyboard"></UToggle></div>
+            </div>
         </UCard>
     </UModal>
 </template>
@@ -347,6 +363,30 @@ onMounted(() => {
     transform: translateY(0);
 }
 
+.fcInfo-enter-active#fcInfo,
+.fcInfo-leave-active#fcInfo {
+    transition:
+        height 400ms,
+        opacity 500ms;
+}
+
+.fcInfo-enter-from#fcInfo,
+.fcInfo-leave-to#fcInfo {
+    height: 0;
+    opacity: 0;
+}
+
+.fcInfo-enter-to#fcInfo,
+.fcInfo-leave-from#fcInfo {
+    height: 1.5rem;
+    opacity: 100;
+}
+
+#fcInfo {
+    height: 1.5rem;
+    text-align: center;
+}
+
 #mainContainer {
     position: absolute;
     justify-items: flex-start;
@@ -378,7 +418,6 @@ onMounted(() => {
 #utilsContainer > #optionsButton {
     width: 20%;
 }
-
 #informationContainer {
     width: 100%;
     height: 90%;
@@ -387,5 +426,19 @@ onMounted(() => {
 
 #informationContainer #information {
     width: 50%;
+    align: center;
+    text-align: center;
+}
+
+.toggleOption {
+    width: 100%;
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+
+.toggleOption > a {
+    text-align: center;
 }
 </style>

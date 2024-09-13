@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     },
 
     ssr: true,
-    target: 'static',
+    target: "static",
 
     modules: ["@nuxt/ui", "@nuxt/icon"],
 });

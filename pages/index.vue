@@ -27,12 +27,12 @@ useHead({
 function applyTheme(theme: string) {
     let classList = document.body.classList;
 
-    if (theme == 'dark') {
-        classList.remove('lightMode');
-        classList.add('darkMode');
-    } else if (theme == 'light') {
-        classList.remove('darkMode');
-        classList.add('lightMode');
+    if (theme == "dark") {
+        classList.remove("lightMode");
+        classList.add("darkMode");
+    } else if (theme == "light") {
+        classList.remove("darkMode");
+        classList.add("lightMode");
     }
 }
 
@@ -52,7 +52,9 @@ body {
 
     background-color: var(--primary-bg);
 
-    transition: --primary-bg 1s, --primary-fg 1s;
+    transition:
+        --primary-bg 1s,
+        --primary-fg 1s;
 }
 
 .darkMode {
