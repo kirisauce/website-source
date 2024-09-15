@@ -61,6 +61,11 @@ const captureKeyboard = persistentValue(
     () => false,
     booleanDeserializer,
 );
+const denyContextMenu = persistentValue(
+    "cps.denyContextMenu",
+    () => true,
+    booleanDeserializer,
+);
 const overlayEnabled = ref(false);
 const count = ref(0);
 const stopAt = ref(new Date());
@@ -196,6 +201,12 @@ onMounted(() => {
             addValueCallback(e);
         }
     });
+
+    document.addEventListener("contextmenu", (e) => {
+        if (overlayEnabled.value && denyContextMenu) {
+            e.preventDefault();
+        }
+    });
 });
 </script>
 
@@ -300,6 +311,13 @@ onMounted(() => {
             <div class="toggleOption">
                 <a>捕获键盘事件</a>
                 <div><UToggle v-model="captureKeyboard"></UToggle></div>
+            </div>
+
+            <br />
+
+            <div class="toggleOption">
+                <a>测试中阻止右键弹窗</a>
+                <div><UToggle v-model="denyContextMenu"></UToggle></div>
             </div>
         </UCard>
     </UModal>
