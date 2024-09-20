@@ -13,6 +13,8 @@ See the Mulan PSL v2 for more details.
 <script lang="ts" setup>
 const PAGE_TITLE = "CPS测试 | kirisauce";
 
+const toast = useToast();
+
 useHead({
     title: PAGE_TITLE,
     meta: [
@@ -104,6 +106,40 @@ function killNonNull(interval) {
     }
 }
 
+// ------ 弹幕 --- BEGIN ------
+
+const danmakuRenderer = ref<any>(null);
+const danmakuEnabled = persistentValue(
+    "cps.danmakuEnabled",
+    () => false,
+    booleanDeserializer,
+);
+
+// 尝试在目标位置根据配置生成一个弹幕。
+// 如果弹幕被禁用则不会生成弹幕。
+function tryMakeDanmaku(x: number, y: number) {
+    if (!danmakuEnabled.value) {
+        return;
+    }
+
+    let dr = danmakuRenderer.value;
+
+    let config = {
+        x,
+        y,
+        content: "xun",
+    };
+    let d = new dr.Bubble(config, 1.0);
+
+    dr.add(d);
+}
+
+function configureDanmaku(e: any) {
+    toast.add({ title: "还没做好 _(:з」∠)_" });
+}
+
+// ------ 弹幕 --- END ------
+
 // 中止测试
 function stopTest(e: event | null) {
     if (e != null) {
@@ -148,8 +184,19 @@ function startTest(e: event) {
     stopAt.value = now;
 }
 
-function addValueCallback(e: event) {
+function mouseEventCallback(e: MouseEvent) {
     count.value += 1;
+
+    tryMakeDanmaku(e.clientX, e.clientY);
+}
+
+function touchEventCallback(e: TouchEvent) {
+    let touch;
+    for (touch of e.changedTouches) {
+        count.value += 1;
+
+        tryMakeDanmaku(touch.clientX, touch.clientY);
+    }
 }
 
 function wrapCallback(
@@ -174,14 +221,14 @@ function wrapCallback(
 // 监听目标事件
 onMounted(() => {
     let target = document.querySelector("#overlay");
-    target.addEventListener("click", wrapCallback("click", addValueCallback));
+    target.addEventListener("click", wrapCallback("click", mouseEventCallback));
     target.addEventListener(
         "touchstart",
-        wrapCallback("touch", addValueCallback),
+        wrapCallback("touch", touchEventCallback),
     );
     target.addEventListener(
         "mousedown",
-        wrapCallback("mouse", addValueCallback),
+        wrapCallback("mouse", mouseEventCallback),
     );
 
     document.addEventListener("keydown", (e) => {
@@ -276,6 +323,11 @@ onMounted(() => {
         </div>
     </div>
 
+    <PopupDanmakuRenderer
+        ref="danmakuRenderer"
+        :enabled="true"
+    ></PopupDanmakuRenderer>
+
     <UModal v-model="showOptions">
         <UCard>
             <template #header>
@@ -319,8 +371,24 @@ onMounted(() => {
                 <a>测试中阻止右键弹窗</a>
                 <div><UToggle v-model="denyContextMenu"></UToggle></div>
             </div>
+
+            <br />
+
+            <div class="toggleOption">
+                <a>启用弹幕</a>
+                <UButton
+                    @click="configureDanmaku"
+                    label="配置弹幕"
+                    v-show="danmakuEnabled"
+                    variant="ghost"
+                    size="2xs"
+                />
+                <div><UToggle v-model="danmakuEnabled"></UToggle></div>
+            </div>
         </UCard>
     </UModal>
+
+    <UNotifications />
 </template>
 
 <style scope>
